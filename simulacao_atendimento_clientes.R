@@ -53,12 +53,14 @@ atendimento <- function(tempo_total, rate, n, mi) {
 
 # Simula N atendentimentos por blocos de 500 e aplica o teor. do limite central
 simula_atendimentos <- function(t, rate, n, mi, nb, c) {
-  # Inicialização de vetores de interesse
-  tam <- c(nb)
-  x_elem <- numeric(0)
-  y_elem <- numeric(0)
-  w_elem <- numeric(0)
-  tmax_elem <- numeric(0)
+  # Inicialização de variáveis e vetores de interesse
+  inicio <- 0
+  fim <- nb
+  tam <- integer(0)
+  x_elem <- numeric(nb)
+  y_elem <- numeric(nb)
+  w_elem <- numeric(nb)
+  tmax_elem <- numeric(nb)
   vetor_w_err <- numeric(0)
   vetor_tmax_err <- numeric(0)
   vetor_medias_x <- numeric(0)
@@ -67,14 +69,16 @@ simula_atendimentos <- function(t, rate, n, mi, nb, c) {
   vetor_medias_tmax <- numeric(0)
 
   while (TRUE) {
-    # obtem os dados cumulados a cada 500 simulações de atendimento
-    for (i in 1:500) {
+    # obtem os dados cumulados a cada nb simulações de atendimento
+    for (i in (inicio + 1):fim) {
       resultado <- atendimento(t, rate, n, mi)
-      x_elem <- c(x_elem, resultado$x)
-      y_elem <- c(y_elem, resultado$y)
-      w_elem <- c(w_elem, resultado$w)
-      tmax_elem <- c(tmax_elem, resultado$tmax)
+      x_elem[i] <- resultado$x
+      y_elem[i] <- resultado$y
+      w_elem[i] <- resultado$w
+      tmax_elem[i] <- resultado$tmax
     }
+    tam <- c(tam, fim) # atualiza o vetor de tamanho parcial
+
     # vetores resultantes com as médias efetuadas a cada 500 iterações
     vetor_medias_x <- c(vetor_medias_x, mean(x_elem))
     vetor_medias_y <- c(vetor_medias_y, mean(y_elem))
@@ -91,7 +95,14 @@ simula_atendimentos <- function(t, rate, n, mi, nb, c) {
     threshold <- 2 * 1.96 * w_err
     if (threshold < c)
       break
-    tam <- c(tam, max(tam) + 500)
+
+    # aloca mais posições aos vetores de elementos
+    x_elem <- c(x_elem, numeric(nb))
+    y_elem <- c(y_elem, numeric(nb))
+    w_elem <- c(w_elem, numeric(nb))
+    tmax_elem <- c(tmax_elem, numeric(nb))
+    inicio <- inicio + nb
+    fim <- fim + nb
   }
   return(list(x_k = vetor_medias_x, y_k = vetor_medias_y, w_k = vetor_medias_w,
               tmax_k = vetor_medias_tmax, k = tam,
@@ -102,7 +113,7 @@ simula_atendimentos <- function(t, rate, n, mi, nb, c) {
 simulacao <- simula_atendimentos(t = 50, rate = 3, n = 5, mi = 0.5,
                                  nb = 500, c = 0.002)
 
-# Gera dataframe com a variável de interesse referentes a W
+# Gera dataframe com a variável de interesse referente a W
 df1 <- cbind.data.frame(simulacao$k, simulacao$w_k, simulacao$w_ep)
 names(df1)[names(df1) == "simulacao$w_k"] <- "W"
 names(df1)[names(df1) == "simulacao$k"] <- "N"
