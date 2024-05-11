@@ -102,6 +102,7 @@ simula_atendimentos <- function(t, rate, n, mi, nb, c) {
 simulacao <- simula_atendimentos(t = 50, rate = 3, n = 5, mi = 0.5,
                                  nb = 500, c = 0.002)
 
+
 # Gera dataframe com a variável de interesse referentes a W
 df1 <- cbind.data.frame(simulacao$k, simulacao$w_k, simulacao$w_ep)
 names(df1)[names(df1) == "simulacao$w_k"] <- "W"
@@ -133,3 +134,70 @@ plot(df2$N, df2$Tmax, type = "l", col = "red", xlab = "N", ylab = "Tmax",
      ylim = range(c(df2$Tmax, df2$lim_inf, df2$lim_sup)))
 lines(df2$N, df2$lim_inf, lty = "dotted")
 lines(df2$N, df2$lim_sup, lty = "dotted")
+
+
+#Subproblema II - Determinar o número  de guichês para que Pr(w <= 20%) >= 95%
+
+simula_atendimentos_II <- function(t, rate, n, mi, tam_amostra, ls, zc) {
+  # Inicialização de vetores de interesse
+  x_elem <- numeric(0)
+  y_elem <- numeric(0)
+  w_elem <- numeric(0)
+  vetor_w_err <- numeric(0)
+  vetor_medias_x <- numeric(0)
+  vetor_medias_y <- numeric(0)
+  vetor_medias_w <- numeric(0)
+  
+  
+  # obtem os dados de simulações de atendimento (tam_amostra)
+  for (i in 1:tam_amostra) {
+    resultado <- atendimento(t, rate, n, mi)
+    x_elem <- c(x_elem, resultado$x)
+    y_elem <- c(y_elem, resultado$y)
+    w_elem <- c(w_elem, resultado$w)
+  }
+  # vetores resultantes com as médias efetuadas a cada 500 iterações
+  vetor_medias_x <- c(vetor_medias_x, mean(x_elem))
+  vetor_medias_y <- c(vetor_medias_y, mean(y_elem))
+  vetor_medias_w <- c(vetor_medias_w, mean(w_elem))
+  
+  # erro padrão de w a cada 500 iterações
+  w_err <- erro_padrao(w_elem)
+  vetor_w_err <- c(vetor_w_err, w_err)
+  
+  # Como desejamos verificar se o número de guichês(n) garante que o parâmetro w 
+  # esteja abaixo do limite superior ls, com um certo nível de confiança 
+  # (valor crítico zc), fazemos as seguintes comparações para a simulação atual
+  
+  threshold <- (ls - mean(w_elem)) / w_err
+  
+  if (threshold >= zc){
+    saida<-paste(length(w_elem), n, mean(w_elem))
+    print(saida)
+    return(1)
+  }else{
+    saida<-paste(length(w_elem), n, mean(w_elem))
+    print(saida)
+    return(0)}
+  
+}
+
+subproblema_II <- function(){
+  
+  n_guiches <- 1
+  
+  # Realizamos a simulçao até encontrarmos um valor de n_guiches que 
+  # garanta as condições de entrada
+  while(TRUE){
+    simulacao <- simula_atendimentos_II(t = 60, rate = 4, n = n_guiches, mi = 0.5,
+                                        tam_amostra = 500, ls = 0.2, zc= 1.96)
+    
+    if(simulacao == 1)
+      break
+    n_guiches = n_guiches + 1
+  }
+  
+  return(n_guiches)
+}
+
+Teste <- subproblema_II()
