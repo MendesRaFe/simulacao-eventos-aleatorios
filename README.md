@@ -11,3 +11,6 @@ Este repositório contém um projeto de simulação em R do atendimento de clien
 2. Abra o arquivo simulacao_atendimento_clientes.R em um ambiente R.
 3. Execute o script para iniciar a simulação.
 4. Analise os resultados e métricas de desempenho gerados.
+
+## Subproblema II
+- Determinar o número ideal de guichês do balcão de atendimento, considerando um cenário específico, para que a proporção ̃clientes que v ao embora seja inferior a um Limite superior, com um nível de confiança de 95% ou superior.
