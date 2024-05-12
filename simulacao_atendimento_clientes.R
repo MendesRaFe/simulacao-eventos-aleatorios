@@ -88,11 +88,11 @@ simula_atendimentos_II <- function(t, rate, n, mi, tam_amostra, ls, zc) {
   threshold <- (ls - mean(w_elem)) / w_err
   
   if (threshold >= zc){
-    saida<-paste(length(w_elem), n, mean(w_elem))
+    saida<-paste(length(w_elem), n, threshold, mean(w_elem))
     print(saida)
     return(1)
   }else{
-    saida<-paste(length(w_elem), n, mean(w_elem))
+    saida<-paste(length(w_elem), n, threshold, mean(w_elem))
     print(saida)
     return(0)}
   
