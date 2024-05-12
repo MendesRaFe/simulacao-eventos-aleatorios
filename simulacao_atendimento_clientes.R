@@ -1,10 +1,23 @@
-## Balcão de Atendimento com Fila ##
+#### Exercício do Programacão 1: Balcão de Atendimento com Fila ####
 
 # Função auxiliar para cálculo do erro padrão
 erro_padrao <- function(dados) {
   dp <- sd(dados)
   st_err <- dp / sqrt(length(dados))
   return(st_err)
+}
+
+# Função para encontrar probabilidade de tm maior que determinado valor
+calc_probab_tm <- function(tmax_values, value) {
+  tm <- tmax_values
+  tamanho <- length(tm)
+  cont <- 0
+  for (i in 1:tamanho) {
+    if (tm[i] > value) {
+      cont <- cont + 1
+    }
+  }
+  return(cont / tamanho)
 }
 
 # Faz a simulação de uma sequêcia de atendimento
@@ -51,7 +64,7 @@ atendimento <- function(tempo_total, rate, n, mi) {
               w = prop_naoatendidos, tmax = tempo_max))
 }
 
-# Simula N atendentimentos por blocos de 500 e aplica o teor. do limite central
+# Simula N atendentimentos por blocos de nb e aplica o teor. do limite central
 simula_atendimentos <- function(t, rate, n, mi, nb, c) {
   # Inicialização de variáveis e vetores de interesse
   inicio <- 0
@@ -79,13 +92,13 @@ simula_atendimentos <- function(t, rate, n, mi, nb, c) {
     }
     tam <- c(tam, fim) # atualiza o vetor de tamanho parcial
 
-    # vetores resultantes com as médias efetuadas a cada 500 iterações
+    # vetores resultantes com as médias efetuadas a cada nb iterações
     vetor_medias_x <- c(vetor_medias_x, mean(x_elem))
     vetor_medias_y <- c(vetor_medias_y, mean(y_elem))
     vetor_medias_w <- c(vetor_medias_w, mean(w_elem))
     vetor_medias_tmax <- c(vetor_medias_tmax, mean(tmax_elem))
 
-    # erros padrão de tmax e de w a cada 500 iterações
+    # erros padrão de tmax e de w a cada nb iterações
     tmax_err <- erro_padrao(tmax_elem)
     vetor_tmax_err <- c(vetor_tmax_err, tmax_err)
     w_err <- erro_padrao(w_elem)
@@ -105,14 +118,17 @@ simula_atendimentos <- function(t, rate, n, mi, nb, c) {
     fim <- fim + nb
   }
   return(list(x_k = vetor_medias_x, y_k = vetor_medias_y, w_k = vetor_medias_w,
-              tmax_k = vetor_medias_tmax, k = tam,
-              tmax_ep = vetor_tmax_err, w_ep = vetor_w_err))
+              tmax_k = vetor_medias_tmax, k = tam, tmax_ep = vetor_tmax_err,
+              w_ep = vetor_w_err, w = w_elem, tm = tmax_elem))
 }
+
+### Subproblema 1 ###
 
 # Grava o resultado do experimento na variável simulacao
 simulacao <- simula_atendimentos(t = 50, rate = 3, n = 5, mi = 0.5,
                                  nb = 500, c = 0.002)
 
+## Item 1 ##
 # Gera dataframe com a variável de interesse referente a W
 df1 <- cbind.data.frame(simulacao$k, simulacao$w_k, simulacao$w_ep)
 names(df1)[names(df1) == "simulacao$w_k"] <- "W"
@@ -129,6 +145,7 @@ plot(df1$N, df1$W, type = "l", col = "red", xlab = "N", ylab = "W",
 lines(df1$N, df1$lim_inf, lty = "dotted")
 lines(df1$N, df1$lim_sup, lty = "dotted")
 
+## Item 2 ##
 # Gera dataframe com a variável de interesse referente a média de tempo máximo
 df2 <- cbind.data.frame(simulacao$k, simulacao$tmax_k, simulacao$tmax_ep)
 names(df2)[names(df2) == "simulacao$tmax_k"] <- "Tmax"
@@ -144,3 +161,32 @@ plot(df2$N, df2$Tmax, type = "l", col = "red", xlab = "N", ylab = "Tmax",
      ylim = range(c(df2$Tmax, df2$lim_inf, df2$lim_sup)))
 lines(df2$N, df2$lim_inf, lty = "dotted")
 lines(df2$N, df2$lim_sup, lty = "dotted")
+
+## Item 3 ##
+# Histograma de W nas N iterações
+hist(simulacao$w, breaks = 40, main = "Histograma dos valores de W",
+     xlab = "W", xlim = c(0, 0.5))
+
+# Histograma de Tm nas N iterações
+hist(simulacao$tm, breaks = 40, main = "Histograma dos valores de Tm",
+     xlab = "Tm", xlim = c(5, 25))
+
+## Item 4 ##
+# Médias finais de X, Y, W e TM
+print("Media Final de X")
+print(simulacao$x_k)
+
+print("Media Final de Y")
+print(simulacao$y_k)
+
+print("Media Final de W")
+print(simulacao$w_k)
+
+print("Media Final de TM")
+print(simulacao$tmax_k)
+
+## Item 5 ##
+# Resultado da probabilidade de tm > 13
+probab_tm <- calc_probab_tm(simulacao$tm, value = 13)
+print(paste("Probabilidade de tm > 13:", probab_tm))
+
