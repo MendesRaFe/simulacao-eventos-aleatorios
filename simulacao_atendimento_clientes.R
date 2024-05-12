@@ -60,9 +60,6 @@ simula_atendimentos_II <- function(t, rate, n, mi, tam_amostra, ls, zc) {
   y_elem <- numeric(0)
   w_elem <- numeric(0)
   vetor_w_err <- numeric(0)
-  vetor_medias_x <- numeric(0)
-  vetor_medias_y <- numeric(0)
-  vetor_medias_w <- numeric(0)
   
   
   # obtem os dados de simulações de atendimento (tam_amostra)
@@ -72,10 +69,6 @@ simula_atendimentos_II <- function(t, rate, n, mi, tam_amostra, ls, zc) {
     y_elem <- c(y_elem, resultado$y)
     w_elem <- c(w_elem, resultado$w)
   }
-  # vetores resultantes com as médias efetuadas a cada 500 iterações
-  vetor_medias_x <- c(vetor_medias_x, mean(x_elem))
-  vetor_medias_y <- c(vetor_medias_y, mean(y_elem))
-  vetor_medias_w <- c(vetor_medias_w, mean(w_elem))
   
   # erro padrão de w a cada 500 iterações
   w_err <- erro_padrao(w_elem)
