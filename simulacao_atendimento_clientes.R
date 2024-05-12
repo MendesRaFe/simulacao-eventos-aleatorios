@@ -70,10 +70,12 @@ simula_atendimentos <- function(t, rate, n, mi, nb, c) {
   inicio <- 0
   fim <- nb
   tam <- integer(0)
+  ws <- 0
   x_elem <- numeric(nb)
   y_elem <- numeric(nb)
   w_elem <- numeric(nb)
   tmax_elem <- numeric(nb)
+  vetor_ws <- numeric(0)
   vetor_w_err <- numeric(0)
   vetor_tmax_err <- numeric(0)
   vetor_medias_x <- numeric(0)
@@ -103,6 +105,12 @@ simula_atendimentos <- function(t, rate, n, mi, nb, c) {
     vetor_tmax_err <- c(vetor_tmax_err, tmax_err)
     w_err <- erro_padrao(w_elem)
     vetor_w_err <- c(vetor_w_err, w_err)
+    
+    # A cada amostra de tamanho i x nb ( sendo i o número da iterações  
+    # geraradoras de novos dados ), guadaremos o valor ws que corresponde ao 
+    # limite superior do intervalo de confiança calculado para W.
+    ws <- mean(w_elem) + (1.96 * w_err)
+    vetor_ws <- c(vetor_ws, ws)
 
     # faz a convergência em relação ao erro padrão de w
     threshold <- 2 * 1.96 * w_err
@@ -119,7 +127,7 @@ simula_atendimentos <- function(t, rate, n, mi, nb, c) {
   }
   return(list(x_k = vetor_medias_x, y_k = vetor_medias_y, w_k = vetor_medias_w,
               tmax_k = vetor_medias_tmax, k = tam, tmax_ep = vetor_tmax_err,
-              w_ep = vetor_w_err, w = w_elem, tm = tmax_elem))
+              w_ep = vetor_w_err, w = w_elem, tm = tmax_elem, ws_k = vetor_ws))
 }
 
 ### Subproblema 1 ###
@@ -188,5 +196,9 @@ print(simulacao$tmax_k)
 ## Item 5 ##
 # Resultado da probabilidade de tm > 13
 probab_tm <- calc_probab_tm(simulacao$tm, value = 13)
-print(paste("Probabilidade de tm > 13:", probab_tm))
+print(paste("P(tm > 13) =", probab_tm))
 
+## Item 6 ##
+# Exibição dos valores de ws para cada amostra, tal que, P(W <= ws) >= 95%
+print("ws para cada iteração")
+print(paste(simulacao$k, simulacao$ws_k))
