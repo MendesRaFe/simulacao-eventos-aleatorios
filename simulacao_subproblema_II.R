@@ -1,4 +1,6 @@
-## Balcão de Atendimento com Fila ##
+#### Exercício do Programacão 1: Balcão de Atendimento com Fila ####
+
+### Subproblema 2 ###
 
 # Função auxiliar para cálculo do erro padrão
 erro_padrao <- function(dados) {
@@ -81,11 +83,11 @@ simula_atendimentos_II <- function(t, rate, n, mi, tam_amostra, ls, zc) {
   threshold <- (ls - mean(w_elem)) / w_err
   
   if (threshold >= zc){
-    saida<-paste(length(w_elem), n, threshold, mean(w_elem))
+    saida<-paste("Tam_Amostra:",length(w_elem),"n:", n, "média W:",mean(w_elem))
     print(saida)
     return(1)
   }else{
-    saida<-paste(length(w_elem), n, threshold, mean(w_elem))
+    saida<-paste("Tam_Amostra:",length(w_elem),"n:", n, "média W:",mean(w_elem))
     print(saida)
     return(0)}
   
@@ -106,6 +108,7 @@ subproblema_II <- function(){
     n_guiches = n_guiches + 1
   }
   
+  print(paste("O número de guichês necessário deve ser maior ou igual a", n_guiches))
   return(n_guiches)
 }
 
